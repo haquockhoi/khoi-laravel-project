@@ -411,7 +411,10 @@
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <!-- item-->
-                                <a class="dropdown-item" href="#"><i class="bx bx-user font-size-16 align-middle me-1"></i> <span key="t-profile">Profile</span></a>
+                                <a class="dropdown-item" href="{{ route('profile.edit') }}">
+    <i class="bx bx-user font-size-16 align-middle me-1"></i>
+    <span key="t-profile">Profile</span>
+</a>
                                 <a class="dropdown-item" href="#"><i class="bx bx-wallet font-size-16 align-middle me-1"></i> <span key="t-my-wallet">My Wallet</span></a>
                                 <a class="dropdown-item d-block" href="#"><span class="badge bg-success float-end">11</span><i class="bx bx-wrench font-size-16 align-middle me-1"></i> <span key="t-settings">Settings</span></a>
                                 <a class="dropdown-item" href="#"><i class="bx bx-lock-open font-size-16 align-middle me-1"></i> <span key="t-lock-screen">Lock screen</span></a>
@@ -622,8 +625,8 @@
                                 </a>
                                 <ul class="sub-menu" aria-expanded="false">
                                     <li><a href="contacts-grid.html" key="t-user-grid">Users Grid</a></li>
-                                    <li><a href="contacts-list.html" key="t-user-list">Users List</a></li>
-                                    <li><a href="contacts-profile.html" key="t-profile">Profile</a></li>
+                                    <a href="{{ route('users.index') }}" key="t-user-list">Users List</a>
+                                   <a href="{{ route('profile.edit') }}" key="t-profile">Profile</a>
                                 </ul>
                             </li>
 

@@ -878,7 +878,9 @@
                                             </div>
                                             <div class="col-sm-8">
                                                 <div class="text-sm-end">
-                                                    <button type="button" data-bs-toggle="modal" data-bs-target="#newContactModal" class="btn btn-success btn-rounded waves-effect waves-light addContact-modal mb-2"><i class="mdi mdi-plus me-1"></i> New Contact</button>
+                                                   <a href="{{ route('users.create') }}" class="btn btn-success btn-rounded waves-effect waves-light">
+    <i class="mdi mdi-plus me-1"></i> New User
+</a>
                                                 </div>
                                             </div><!-- end col-->
                                         </div>
@@ -895,6 +897,62 @@
                                                         <th scope="col" style="width: 200px;">Action</th>
                                                     </tr>
                                                 </thead>
+                                                <tbody>
+    @forelse ($users as $user)
+        <tr>
+            <td>
+                <div class="avatar-xs">
+                    <span class="avatar-title rounded-circle bg-primary text-white">
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                    </span>
+                </div>
+            </td>
+
+            <td>
+                <h5 class="font-size-14 mb-1">
+                    <a href="javascript:void(0);" class="text-dark">
+                        {{ $user->name }}
+                    </a>
+                </h5>
+                <p class="text-muted mb-0">User</p>
+            </td>
+
+            <td>{{ $user->email }}</td>
+
+            <td>
+                <span class="badge bg-primary-subtle text-primary font-size-12">
+                    Laravel
+                </span>
+            </td>
+
+            <td>
+                {{ $user->created_at ? $user->created_at->format('d/m/Y') : '' }}
+            </td>
+
+            <td>
+    <a href="{{ route('users.edit', $user->id) }}" class="text-success me-2">
+        <i class="mdi mdi-pencil font-size-18"></i>
+    </a>
+
+    <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline"
+          onsubmit="return confirm('Are you sure you want to delete this user?')">
+        @csrf
+        @method('DELETE')
+
+        <button type="submit" class="btn btn-link text-danger p-0 m-0">
+            <i class="mdi mdi-delete font-size-18"></i>
+        </button>
+    </form>
+</td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="6" class="text-center text-muted">
+                Chưa có người dùng nào trong database
+            </td>
+        </tr>
+    @endforelse
+</tbody>
                                             </table>
                                             <!-- end table -->
                                         </div>
@@ -1108,7 +1166,7 @@
         <script src="assets/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
         
         <!-- ecommerce-customer-list init -->
-        <script src="assets/js/pages/contact-user-list.init.js"></script>
+        {{-- <script src="assets/js/pages/contact-user-list.init.js"></script> --}}
         <!-- App js -->
         <script src="assets/js/app.js"></script>
 

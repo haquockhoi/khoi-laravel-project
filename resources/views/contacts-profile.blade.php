@@ -404,17 +404,25 @@
                             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-1.jpg"
                                     alt="Header Avatar">
-                                <span class="d-none d-xl-inline-block ms-1" key="t-henry">Henry</span>
+                                <span class="d-none d-xl-inline-block ms-1">
+    {{ $user->name }}
+</span>
                                 <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <!-- item-->
-                                <a class="dropdown-item" href="#"><i class="bx bx-user font-size-16 align-middle me-1"></i> <span key="t-profile">Profile</span></a>
+                                <a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bx bx-user font-size-16 align-middle me-1"></i> <span key="t-profile">Profile</span></a>
                                 <a class="dropdown-item" href="#"><i class="bx bx-wallet font-size-16 align-middle me-1"></i> <span key="t-my-wallet">My Wallet</span></a>
                                 <a class="dropdown-item d-block" href="#"><span class="badge bg-success float-end">11</span><i class="bx bx-wrench font-size-16 align-middle me-1"></i> <span key="t-settings">Settings</span></a>
                                 <a class="dropdown-item" href="#"><i class="bx bx-lock-open font-size-16 align-middle me-1"></i> <span key="t-lock-screen">Lock screen</span></a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item text-danger" href="#"><i class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i> <span key="t-logout">Logout</span></a>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i>
+                                        <span key="t-logout">Logout</span>
+                                    </button>
+                                </form>
                             </div>
                         </div>
 
@@ -446,7 +454,7 @@
                                 </a>
                                 <ul class="sub-menu" aria-expanded="false">
                                     <li><a href="index.html" key="t-default">Default</a></li>
-                                    <li><a href="dashboard-saas.html" key="t-saas">Saas</a></li>
+                                    <li><a href="{{ route('dashboard') }}" key="t-saas">Saas</a></li>
                                     <li><a href="dashboard-crypto.html" key="t-crypto">Crypto</a></li>
                                     <li><a href="dashboard-blog.html" key="t-blog">Blog</a></li>
                                     <li><a href="dashboard-job.html" key="t-jobs">Jobs</a></li>
@@ -612,9 +620,9 @@
                                     <span key="t-contacts">Contacts</span>
                                 </a>
                                 <ul class="sub-menu" aria-expanded="false">
-                                    <li><a href="contacts-grid.html" key="t-user-grid">Users Grid</a></li>
-                                    <li><a href="contacts-list.html" key="t-user-list">Users List</a></li>
-                                    <li><a href="contacts-profile.html" key="t-profile">Profile</a></li>
+                                    <li><a href="{{ route('users.index') }}" key="t-user-grid">Users Grid</a></li>
+                                    <li><a href="{{ route('users.index') }}" key="t-user-list">Users List</a></li>
+                                    <li><a href="{{ route('profile.edit') }}" key="t-profile">Profile</a></li>
                                 </ul>
                             </li>
 
@@ -876,8 +884,8 @@
                                                 <div class="avatar-md profile-user-wid mb-4">
                                                     <img src="assets/images/users/avatar-1.jpg" alt="" class="img-thumbnail rounded-circle">
                                                 </div>
-                                                <h5 class="font-size-15 text-truncate">Cynthia Price</h5>
-                                                <p class="text-muted mb-0 text-truncate">UI/UX Designer</p>
+                                                <h5 class="font-size-15 text-truncate">{{ $user->name }}</h5>
+<p class="text-muted mb-0 text-truncate">{{ $user->email }}</p>
                                             </div>
 
                                             <div class="col-sm-8">
@@ -907,28 +915,33 @@
                                     <div class="card-body">
                                         <h4 class="card-title mb-4">Personal Information</h4>
 
-                                        <p class="text-muted mb-4">Hi I'm Cynthia Price,has been the industry's standard dummy text To an English person, it will seem like simplified English, as a skeptical Cambridge.</p>
+                                        <p class="text-muted mb-4">
+                                            Basic account information of the currently logged-in user.
+                                            You can update the profile and change the password from the settings panel on the right.
+                                        </p>
+
                                         <div class="table-responsive">
                                             <table class="table table-nowrap mb-0">
                                                 <tbody>
                                                     <tr>
                                                         <th scope="row">Full Name :</th>
-                                                        <td>Cynthia Price</td>
+                                                        <td>{{ $user->name }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th scope="row">Mobile :</th>
-                                                        <td>(123) 123 1234</td>
+                                                        <th scope="row">Email :</th>
+                                                        <td>{{ $user->email }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th scope="row">E-mail :</th>
-                                                        <td>cynthiaskote@gmail.com</td>
+                                                        <th scope="row">Account Type :</th>
+                                                        <td>{{ $user->role ?? 'user' }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th scope="row">Location :</th>
-                                                        <td>California, United States</td>
+                                                        <th scope="row">Joined :</th>
+                                                        <td>{{ optional($user->created_at)->format('d/m/Y') }}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
+                                        </div>
                                         </div>
                                     </div>
                                 </div>
@@ -997,6 +1010,105 @@
                             </div>         
                             
                             <div class="col-xl-8">
+
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="card-title mb-4">Account Settings</h4>
+
+                                        @if (session('status') === 'profile-updated')
+                                            <div class="alert alert-success">
+                                                Profile updated successfully!
+                                            </div>
+                                        @endif
+
+                                        @if (session('status') === 'password-updated')
+                                            <div class="alert alert-success">
+                                                Password updated successfully!
+                                            </div>
+                                        @endif
+
+                                        @if ($errors->any())
+                                            <div class="alert alert-danger">
+                                                <ul class="mb-0">
+                                                    @foreach ($errors->all() as $error)
+                                                        <li>{{ $error }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        @endif
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <h5 class="font-size-15 mb-3">Update Profile</h5>
+
+                                                <form method="POST" action="{{ route('profile.update') }}">
+                                                    @csrf
+                                                    @method('PATCH')
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Name</label>
+                                                        <input type="text"
+                                                               name="name"
+                                                               class="form-control"
+                                                               value="{{ old('name', $user->name) }}"
+                                                               required>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Email</label>
+                                                        <input type="email"
+                                                               name="email"
+                                                               class="form-control"
+                                                               value="{{ old('email', $user->email) }}"
+                                                               required>
+                                                    </div>
+
+                                                    <button type="submit" class="btn btn-primary">
+                                                        Update Profile
+                                                    </button>
+                                                </form>
+                                            </div>
+
+                                            <div class="col-lg-6 mt-4 mt-lg-0">
+                                                <h5 class="font-size-15 mb-3">Change Password</h5>
+
+                                                <form method="POST" action="{{ route('password.update') }}">
+                                                    @csrf
+                                                    @method('PUT')
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Current Password</label>
+                                                        <input type="password"
+                                                               name="current_password"
+                                                               class="form-control"
+                                                               required>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label">New Password</label>
+                                                        <input type="password"
+                                                               name="password"
+                                                               class="form-control"
+                                                               required>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Confirm Password</label>
+                                                        <input type="password"
+                                                               name="password_confirmation"
+                                                               class="form-control"
+                                                               required>
+                                                    </div>
+
+                                                    <button type="submit" class="btn btn-success">
+                                                        Change Password
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
 
                                 <div class="row">
                                     <div class="col-md-4">
