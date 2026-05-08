@@ -41,19 +41,19 @@ Route::get('/dashboard', function () {
 */
 
 Route::view('/form-advanced', 'form-advanced')
-    ->middleware('auth');
+    ->middleware(['auth', 'admin']);
 
 Route::view('/ecommerce-customers', 'ecommerce-customers')
-    ->middleware('auth');
+    ->middleware(['auth', 'admin']);
 
 Route::view('/ecommerce-checkout', 'ecommerce-checkout')
-    ->middleware('auth');
+    ->middleware(['auth', 'admin']);
 
 Route::view('/email-template-basic', 'email-template-basic')
-    ->middleware('auth');
+    ->middleware(['auth', 'admin']);
 
 Route::view('/email-template-billing', 'email-template-billing')
-    ->middleware('auth');
+    ->middleware(['auth', 'admin']);
 
 /*
 |--------------------------------------------------------------------------
@@ -61,7 +61,7 @@ Route::view('/email-template-billing', 'email-template-billing')
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/users', [UserController::class, 'index'])
         ->name('users.index');
