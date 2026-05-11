@@ -9,6 +9,11 @@ class UserGroup extends Model
     protected $fillable = [
         'name',
         'description',
+        'is_fullaccess',
+    ];
+
+    protected $casts = [
+        'is_fullaccess' => 'boolean',
     ];
 
     public function users()
