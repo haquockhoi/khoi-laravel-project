@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserGroupController;
@@ -62,6 +64,74 @@ Route::view('/email-template-basic', 'email-template-basic')
 Route::view('/email-template-billing', 'email-template-billing')
     ->middleware(['auth', 'permission:PageController,email_template_billing'])
     ->name('email.billing');
+
+/*
+|--------------------------------------------------------------------------
+| News Categories Management
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/categories', [CategoryController::class, 'index'])
+        ->middleware('permission:CategoryController,index')
+        ->name('categories.index');
+
+    Route::get('/categories/create', [CategoryController::class, 'create'])
+        ->middleware('permission:CategoryController,create')
+        ->name('categories.create');
+
+    Route::post('/categories', [CategoryController::class, 'store'])
+        ->middleware('permission:CategoryController,store')
+        ->name('categories.store');
+
+    Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])
+        ->middleware('permission:CategoryController,edit')
+        ->name('categories.edit');
+
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])
+        ->middleware('permission:CategoryController,update')
+        ->name('categories.update');
+
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])
+        ->middleware('permission:CategoryController,destroy')
+        ->name('categories.destroy');
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| News Management
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/news', [NewsController::class, 'index'])
+        ->middleware('permission:NewsController,index')
+        ->name('news.index');
+
+    Route::get('/news/create', [NewsController::class, 'create'])
+        ->middleware('permission:NewsController,create')
+        ->name('news.create');
+
+    Route::post('/news', [NewsController::class, 'store'])
+        ->middleware('permission:NewsController,store')
+        ->name('news.store');
+
+    Route::get('/news/{news}/edit', [NewsController::class, 'edit'])
+        ->middleware('permission:NewsController,edit')
+        ->name('news.edit');
+
+    Route::put('/news/{news}', [NewsController::class, 'update'])
+        ->middleware('permission:NewsController,update')
+        ->name('news.update');
+
+    Route::delete('/news/{news}', [NewsController::class, 'destroy'])
+        ->middleware('permission:NewsController,destroy')
+        ->name('news.destroy');
+
+});
 
 /*
 |--------------------------------------------------------------------------

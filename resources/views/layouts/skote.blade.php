@@ -188,6 +188,32 @@
                             </li>
                         </ul>
                     </li>
+                                        <li class="menu-title">News Management</li>
+
+                    <li>
+                        <a href="javascript:void(0);" class="has-arrow waves-effect">
+                            <i class="bx bx-news"></i>
+                            <span>News Management</span>
+                        </a>
+
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li>
+                                <a href="{{ route('categories.index') }}">Categories</a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('categories.create') }}">Create Category</a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('news.index') }}">News List</a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('news.create') }}">Create News</a>
+                            </li>
+                        </ul>
+                    </li>
 
                     <li class="menu-title">Apps</li>
 

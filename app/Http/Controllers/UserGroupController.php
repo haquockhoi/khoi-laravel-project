@@ -99,6 +99,24 @@ class UserGroupController extends Controller
                 'updatePermissions' => 'Cập nhật phân quyền nhóm',
             ],
 
+            'CategoryController' => [
+                'index' => 'Xem danh sách danh mục tin tức',
+                'create' => 'Mở form thêm danh mục tin tức',
+                'store' => 'Lưu danh mục tin tức mới',
+                'edit' => 'Mở form sửa danh mục tin tức',
+                'update' => 'Cập nhật danh mục tin tức',
+                'destroy' => 'Xoá danh mục tin tức',
+            ],
+
+            'NewsController' => [
+                'index' => 'Xem danh sách tin tức',
+                'create' => 'Mở form thêm tin tức',
+                'store' => 'Lưu tin tức mới',
+                'edit' => 'Mở form sửa tin tức',
+                'update' => 'Cập nhật tin tức',
+                'destroy' => 'Xoá tin tức',
+            ],
+
             'ProfileController' => [
                 'edit' => 'Xem profile',
                 'update' => 'Cập nhật profile',
