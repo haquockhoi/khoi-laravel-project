@@ -73,6 +73,10 @@ Route::view('/email-template-billing', 'email-template-billing')
 
 Route::middleware(['auth'])->group(function () {
 
+    Route::get('/ajax/categories', [CategoryController::class, 'data'])
+        ->middleware('permission:CategoryController,index')
+        ->name('categories.data');
+
     Route::get('/categories', [CategoryController::class, 'index'])
         ->middleware('permission:CategoryController,index')
         ->name('categories.index');
@@ -107,6 +111,14 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
+    Route::get('/ajax/news', [NewsController::class, 'data'])
+        ->middleware('permission:NewsController,index')
+        ->name('news.data');
+
+    Route::get('/ajax/news/{news}', [NewsController::class, 'showAjax'])
+        ->middleware('permission:NewsController,edit')
+        ->name('news.showAjax');
+
     Route::get('/news', [NewsController::class, 'index'])
         ->middleware('permission:NewsController,index')
         ->name('news.index');
@@ -140,6 +152,14 @@ Route::middleware(['auth'])->group(function () {
 */
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/ajax/user-groups', [UserGroupController::class, 'data'])
+        ->middleware('permission:UserGroupController,index')
+        ->name('user-groups.data');
+
+    Route::get('/ajax/user-groups/{userGroup}/permissions', [UserGroupController::class, 'permissionsAjax'])
+        ->middleware('permission:UserGroupController,permissions')
+        ->name('user-groups.permissions.ajax');
 
     Route::get('/user-groups', [UserGroupController::class, 'index'])
         ->middleware('permission:UserGroupController,index')
@@ -182,6 +202,14 @@ Route::middleware(['auth'])->group(function () {
 */
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/ajax/users', [UserController::class, 'data'])
+        ->middleware('permission:UserController,index')
+        ->name('users.data');
+
+    Route::get('/ajax/users/{user}', [UserController::class, 'showAjax'])
+        ->middleware('permission:UserController,edit')
+        ->name('users.showAjax');
 
     Route::get('/users', [UserController::class, 'index'])
         ->middleware('permission:UserController,index')
@@ -231,4 +259,4 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

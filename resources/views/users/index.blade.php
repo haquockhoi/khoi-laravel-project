@@ -1,19 +1,19 @@
 @extends('layouts.skote')
 
-@section('title', 'News | Skote')
+@section('title', 'Users | Skote')
 
 @section('content')
 <div class="row">
     <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0 font-size-18">News Management</h4>
+            <h4 class="mb-sm-0 font-size-18">Users</h4>
 
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">
                     <li class="breadcrumb-item">
                         <a href="{{ route('dashboard') }}">Dashboard</a>
                     </li>
-                    <li class="breadcrumb-item active">News</li>
+                    <li class="breadcrumb-item active">Users</li>
                 </ol>
             </div>
         </div>
@@ -26,26 +26,32 @@
     </div>
 @endif
 
+@if(session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
+
 <div class="card">
     <div class="card-body">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title mb-0">News List</h4>
+            <h4 class="card-title mb-0">User List</h4>
 
-            <a href="{{ route('news.create') }}" class="btn btn-success">
-                + New News
+            <a href="{{ route('users.create') }}" class="btn btn-success">
+                + New User
             </a>
         </div>
 
         <div class="table-responsive">
-            <table id="news-table" class="table table-bordered align-middle w-100">
+            <table id="users-table" class="table table-bordered align-middle w-100">
                 <thead>
                     <tr>
                         <th style="width: 70px;">#</th>
-                        <th>Title</th>
-                        <th>Categories</th>
-                        <th>Author</th>
-                        <th>Status</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>User Group</th>
                         <th>Created At</th>
                         <th style="width: 220px;">Action</th>
                     </tr>
@@ -101,13 +107,13 @@
 </style>
 
 <script>
-    let newsTable = null;
+    let usersTable = null;
 
     $(document).ready(function () {
-        newsTable = $('#news-table').DataTable({
+        usersTable = $('#users-table').DataTable({
             processing: true,
             serverSide: true,
-            ajax: '{{ route('news.data') }}',
+            ajax: '{{ route('users.data') }}',
             pageLength: 10,
             order: [[0, 'desc']],
             columns: [
@@ -116,22 +122,22 @@
                     name: 'id'
                 },
                 {
-                    data: 'title',
-                    name: 'title'
+                    data: 'name',
+                    name: 'name'
                 },
                 {
-                    data: 'categories',
-                    name: 'categories',
-                    orderable: false
+                    data: 'email',
+                    name: 'email'
                 },
                 {
-                    data: 'author',
-                    name: 'author',
-                    orderable: false
+                    data: 'role',
+                    name: 'role',
+                    orderable: false,
+                    searchable: false
                 },
                 {
-                    data: 'status',
-                    name: 'status',
+                    data: 'user_group',
+                    name: 'user_group',
                     orderable: false,
                     searchable: false
                 },
@@ -148,7 +154,7 @@
             ],
             columnDefs: [
                 {
-                    targets: [1, 2, 4, 6],
+                    targets: [1, 3, 4, 6],
                     render: function (data) {
                         return data;
                     }
@@ -172,17 +178,17 @@
         });
     });
 
-    $(document).on('submit', '.delete-news-form', function (event) {
+    $(document).on('submit', '.delete-user-form', function (event) {
         event.preventDefault();
 
         const form = this;
-        const newsTitle = form.getAttribute('data-name') || 'bài viết này';
+        const userName = form.getAttribute('data-name') || 'user này';
         const url = form.getAttribute('action');
         const token = form.querySelector('input[name="_token"]').value;
 
         Swal.fire({
             title: 'Xác nhận xoá?',
-            text: 'Bạn có chắc muốn xoá bài viết "' + newsTitle + '" không?',
+            text: 'Bạn có chắc muốn xoá user "' + userName + '" không?',
             icon: 'warning',
             width: '400px',
             padding: '1rem',
@@ -218,7 +224,7 @@
                 })
                 .then(function (data) {
                     if (data.success) {
-                        newsTable.ajax.reload(null, false);
+                        usersTable.ajax.reload(null, false);
 
                         Swal.fire({
                             title: 'Đã xoá!',
@@ -231,7 +237,7 @@
                     } else {
                         Swal.fire({
                             title: 'Lỗi!',
-                            text: data.message || 'Không thể xoá bài viết.',
+                            text: data.message || 'Không thể xoá user.',
                             icon: 'error',
                             width: '360px'
                         });
@@ -240,7 +246,7 @@
                 .catch(function (error) {
                     Swal.fire({
                         title: 'Lỗi!',
-                        text: error.message || 'Không thể xoá bài viết. Vui lòng thử lại.',
+                        text: error.message || 'Không thể xoá user. Vui lòng thử lại.',
                         icon: 'error',
                         width: '360px'
                     });

@@ -38,7 +38,7 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table table-bordered align-middle">
+            <table id="categories-table" class="table table-bordered align-middle w-100">
                 <thead>
                     <tr>
                         <th style="width: 70px;">#</th>
@@ -51,59 +51,7 @@
                     </tr>
                 </thead>
 
-                <tbody>
-                    @forelse($categories as $category)
-                        <tr>
-                            <td>{{ $category->id }}</td>
-
-                            <td>
-                                <strong>{{ $category->name }}</strong>
-                            </td>
-
-                            <td>{{ $category->slug }}</td>
-
-                            <td>{{ $category->description ?? '-' }}</td>
-
-                            <td>
-                                <span class="badge bg-primary">
-                                    {{ $category->news_count }} news
-                                </span>
-                            </td>
-
-                            <td>
-                                @if($category->status)
-                                    <span class="badge bg-success">Active</span>
-                                @else
-                                    <span class="badge bg-secondary">Inactive</span>
-                                @endif
-                            </td>
-
-                            <td>
-                                <a href="{{ route('categories.edit', $category) }}" class="btn btn-warning btn-sm">
-                                    Edit
-                                </a>
-
-                                <form action="{{ route('categories.destroy', $category) }}"
-                                      method="POST"
-                                      class="d-inline delete-form"
-                                      data-name="{{ $category->name }}">
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center">
-                                Chưa có danh mục tin tức nào.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
 
@@ -112,7 +60,11 @@
 @endsection
 
 @section('script')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 
 <style>
     .swal2-popup.swal-small-popup {
@@ -149,34 +101,151 @@
 </style>
 
 <script>
-    document.querySelectorAll('.delete-form').forEach(function (form) {
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
+    let categoriesTable = null;
 
-            const categoryName = form.getAttribute('data-name') || 'danh mục này';
+    $(document).ready(function () {
+        categoriesTable = $('#categories-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: '{{ route('categories.data') }}',
+            pageLength: 10,
+            order: [[0, 'desc']],
+            columns: [
+                {
+                    data: 'id',
+                    name: 'id'
+                },
+                {
+                    data: 'name',
+                    name: 'name'
+                },
+                {
+                    data: 'slug',
+                    name: 'slug'
+                },
+                {
+                    data: 'description',
+                    name: 'description'
+                },
+                {
+                    data: 'news_count',
+                    name: 'news_count',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'status',
+                    name: 'status',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+            columnDefs: [
+                {
+                    targets: [1, 4, 5, 6],
+                    render: function (data) {
+                        return data;
+                    }
+                }
+            ],
+            language: {
+                processing: 'Đang tải dữ liệu...',
+                search: 'Tìm kiếm:',
+                lengthMenu: 'Hiển thị _MENU_ dòng',
+                info: 'Hiển thị _START_ đến _END_ của _TOTAL_ dòng',
+                infoEmpty: 'Không có dữ liệu',
+                infoFiltered: '(lọc từ _MAX_ dòng)',
+                zeroRecords: 'Không tìm thấy dữ liệu phù hợp',
+                paginate: {
+                    first: 'Đầu',
+                    last: 'Cuối',
+                    next: 'Sau',
+                    previous: 'Trước'
+                }
+            }
+        });
+    });
 
-            Swal.fire({
-                title: 'Xác nhận xoá?',
-                text: 'Bạn có chắc muốn xoá danh mục "' + categoryName + '" không?',
-                icon: 'warning',
-                width: '400px',
-                padding: '1rem',
-                showCancelButton: true,
-                confirmButtonText: 'Có, xoá ngay',
-                cancelButtonText: 'Huỷ',
-                buttonsStyling: false,
-                customClass: {
-                    popup: 'swal-small-popup',
-                    title: 'swal-small-title',
-                    htmlContainer: 'swal-small-text',
-                    confirmButton: 'swal-small-btn btn btn-danger me-2',
-                    cancelButton: 'swal-small-btn btn btn-secondary'
-                }
-            }).then(function (result) {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
+    $(document).on('submit', '.delete-category-form', function (event) {
+        event.preventDefault();
+
+        const form = this;
+        const categoryName = form.getAttribute('data-name') || 'danh mục này';
+        const url = form.getAttribute('action');
+        const token = form.querySelector('input[name="_token"]').value;
+
+        Swal.fire({
+            title: 'Xác nhận xoá?',
+            text: 'Bạn có chắc muốn xoá danh mục "' + categoryName + '" không?',
+            icon: 'warning',
+            width: '400px',
+            padding: '1rem',
+            showCancelButton: true,
+            confirmButtonText: 'Có, xoá ngay',
+            cancelButtonText: 'Huỷ',
+            buttonsStyling: false,
+            customClass: {
+                popup: 'swal-small-popup',
+                title: 'swal-small-title',
+                htmlContainer: 'swal-small-text',
+                confirmButton: 'swal-small-btn btn btn-danger me-2',
+                cancelButton: 'swal-small-btn btn btn-secondary'
+            }
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': token,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(async function (response) {
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw data;
+                    }
+
+                    return data;
+                })
+                .then(function (data) {
+                    if (data.success) {
+                        categoriesTable.ajax.reload(null, false);
+
+                        Swal.fire({
+                            title: 'Đã xoá!',
+                            text: data.message,
+                            icon: 'success',
+                            width: '360px',
+                            timer: 1200,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: data.message || 'Không thể xoá danh mục.',
+                            icon: 'error',
+                            width: '360px'
+                        });
+                    }
+                })
+                .catch(function (error) {
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: error.message || 'Không thể xoá danh mục. Vui lòng thử lại.',
+                        icon: 'error',
+                        width: '360px'
+                    });
+                });
+            }
         });
     });
 </script>

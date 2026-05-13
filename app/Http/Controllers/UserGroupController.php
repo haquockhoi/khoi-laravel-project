@@ -10,9 +10,98 @@ class UserGroupController extends Controller
 {
     public function index()
     {
-        $userGroups = UserGroup::withCount('permissions')->latest()->get();
+        return view('user-groups.index');
+    }
 
-        return view('user-groups.index', compact('userGroups'));
+    public function data(Request $request)
+    {
+        $columns = [
+            0 => 'id',
+            1 => 'name',
+            2 => 'description',
+            3 => 'is_fullaccess',
+            4 => 'id',
+            5 => 'id',
+        ];
+
+        $totalData = UserGroup::count();
+
+        $query = UserGroup::withCount('permissions');
+
+        if (!empty($request->input('search.value'))) {
+            $search = $request->input('search.value');
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $totalFiltered = $query->count();
+
+        $orderColumnIndex = $request->input('order.0.column', 0);
+        $orderColumn = $columns[$orderColumnIndex] ?? 'id';
+        $orderDirection = $request->input('order.0.dir', 'desc');
+
+        if (in_array($orderColumn, ['id', 'name', 'description', 'is_fullaccess'])) {
+            $query->orderBy($orderColumn, $orderDirection);
+        } else {
+            $query->latest();
+        }
+
+        $userGroups = $query
+            ->offset($request->input('start', 0))
+            ->limit($request->input('length', 10))
+            ->get();
+
+        $data = [];
+
+        foreach ($userGroups as $group) {
+            $fullAccess = $group->is_fullaccess
+                ? '<span class="badge bg-success">Yes</span>'
+                : '<span class="badge bg-secondary">No</span>';
+
+            $permissions = '<span class="badge bg-primary">' . $group->permissions_count . ' permissions</span>';
+
+            $action = '
+                <a href="' . route('user-groups.permissions', $group) . '" class="btn btn-info btn-sm">
+                    Permissions
+                </a>
+
+                <a href="' . route('user-groups.edit', $group) . '" class="btn btn-warning btn-sm">
+                    Edit
+                </a>
+
+                <form action="' . route('user-groups.destroy', $group) . '"
+                      method="POST"
+                      class="d-inline delete-user-group-form"
+                      data-id="' . $group->id . '"
+                      data-name="' . e($group->name) . '">
+                    <input type="hidden" name="_token" value="' . csrf_token() . '">
+                    <input type="hidden" name="_method" value="DELETE">
+
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        Delete
+                    </button>
+                </form>
+            ';
+
+            $data[] = [
+                'id' => $group->id,
+                'name' => '<strong>' . e($group->name) . '</strong>',
+                'description' => e($group->description ?? '-'),
+                'is_fullaccess' => $fullAccess,
+                'permissions_count' => $permissions,
+                'action' => $action,
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $totalData,
+            'recordsFiltered' => $totalFiltered,
+            'data' => $data,
+        ]);
     }
 
     public function create()
@@ -28,11 +117,20 @@ class UserGroupController extends Controller
             'is_fullaccess' => 'nullable|boolean',
         ]);
 
-        UserGroup::create([
+        $userGroup = UserGroup::create([
             'name' => $request->name,
             'description' => $request->description,
             'is_fullaccess' => $request->has('is_fullaccess'),
         ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Tạo nhóm user thành công!',
+                'redirect' => route('user-groups.index'),
+                'data' => $userGroup,
+            ]);
+        }
 
         return redirect()
             ->route('user-groups.index')
@@ -58,14 +156,31 @@ class UserGroupController extends Controller
             'is_fullaccess' => $request->has('is_fullaccess'),
         ]);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật nhóm user thành công!',
+                'redirect' => route('user-groups.index'),
+                'data' => $userGroup,
+            ]);
+        }
+
         return redirect()
             ->route('user-groups.index')
             ->with('success', 'Cập nhật nhóm user thành công!');
     }
 
-    public function destroy(UserGroup $userGroup)
+    public function destroy(UserGroup $userGroup, Request $request)
     {
+        $userGroup->permissions()->delete();
         $userGroup->delete();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Xoá nhóm user thành công!',
+            ]);
+        }
 
         return redirect()
             ->route('user-groups.index')
@@ -74,7 +189,67 @@ class UserGroupController extends Controller
 
     public function permissions(UserGroup $userGroup)
     {
-        $permissions = [
+        return view('user-groups.permissions', compact('userGroup'));
+    }
+
+    public function permissionsAjax(UserGroup $userGroup)
+    {
+        $permissions = $this->getPermissionList();
+
+        $selectedPermissions = $userGroup->permissions()
+            ->get()
+            ->map(function ($permission) {
+                return $permission->controller . '@' . $permission->action;
+            })
+            ->toArray();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'group' => [
+                    'id' => $userGroup->id,
+                    'name' => $userGroup->name,
+                    'is_fullaccess' => (bool) $userGroup->is_fullaccess,
+                ],
+                'permissions' => $permissions,
+                'selectedPermissions' => $selectedPermissions,
+            ],
+        ]);
+    }
+
+    public function updatePermissions(Request $request, UserGroup $userGroup)
+    {
+        $request->validate([
+            'permissions' => 'nullable|array',
+        ]);
+
+        $userGroup->permissions()->delete();
+
+        foreach ($request->permissions ?? [] as $permission) {
+            [$controller, $action] = explode('@', $permission);
+
+            UserGroupPermission::create([
+                'user_group_id' => $userGroup->id,
+                'controller' => $controller,
+                'action' => $action,
+            ]);
+        }
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật phân quyền thành công!',
+            ]);
+        }
+
+        return redirect()
+            ->route('user-groups.permissions', $userGroup)
+            ->with('success', 'Cập nhật phân quyền thành công!');
+    }
+
+    private function getPermissionList()
+    {
+        return [
             'DashboardController' => [
                 'index' => 'Xem dashboard',
             ],
@@ -131,41 +306,5 @@ class UserGroupController extends Controller
                 'email_template_billing' => 'Truy cập Email Template Billing',
             ],
         ];
-
-        $selectedPermissions = $userGroup->permissions()
-            ->get()
-            ->map(function ($permission) {
-                return $permission->controller . '@' . $permission->action;
-            })
-            ->toArray();
-
-        return view('user-groups.permissions', compact(
-            'userGroup',
-            'permissions',
-            'selectedPermissions'
-        ));
-    }
-
-    public function updatePermissions(Request $request, UserGroup $userGroup)
-    {
-        $request->validate([
-            'permissions' => 'nullable|array',
-        ]);
-
-        $userGroup->permissions()->delete();
-
-        foreach ($request->permissions ?? [] as $permission) {
-            [$controller, $action] = explode('@', $permission);
-
-            UserGroupPermission::create([
-                'user_group_id' => $userGroup->id,
-                'controller' => $controller,
-                'action' => $action,
-            ]);
-        }
-
-        return redirect()
-            ->route('user-groups.permissions', $userGroup)
-            ->with('success', 'Cập nhật phân quyền thành công!');
     }
 }
