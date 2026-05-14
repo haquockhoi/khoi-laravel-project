@@ -1,0 +1,15 @@
+{
+    "success": true,
+    "message": "Đăng nhập thành công.",
+    "data": {
+        "token_type": "Bearer",
+        "access_token": "6|3zzj7RSfjwoiiumuF4inA15mNuiz5IFMk80QCjwzde38e31f",
+        "user": {
+            "id": 3,
+            "name": "hakhoi2003",
+            "email": "hakhoi2502@gmail.com",
+            "role": "admin",
+            "user_group_id": 1
+        }
+    }
+}
